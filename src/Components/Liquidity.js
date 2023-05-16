@@ -50,8 +50,8 @@ const Liquidity = () => {
     );
     const token2s = new ethers.Contract(tokenBs, ERC20_ABI, signer);
 
-    // await token1s.connect(signer).approve(NONFUNGIBLE_POSITION_MANAGER, ethers.utils.parseEther("1000"));
-    // await token2s.connect(signer).approve(NONFUNGIBLE_POSITION_MANAGER, ethers.utils.parseEther("1000"));
+    await token1s.connect(signer).approve(NONFUNGIBLE_POSITION_MANAGER, ethers.utils.parseEther("1000"));
+    await token2s.connect(signer).approve(NONFUNGIBLE_POSITION_MANAGER, ethers.utils.parseEther("1000"));
 
     const poolContract = new ethers.Contract(
       poolAddress,

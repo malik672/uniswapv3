@@ -45,31 +45,39 @@ const Pools = () => {
     // Create signer and contract instances
     const signer = provider.getSigner();
     const v3liquidity = new ethers.Contract(v3Factory, liquidity, signer);
-    // const tokenContract = new ethers.Contract(
-    //   "0x3211eb8CFa62807225bDAe65d34FD2D728ceafD1",
-    //   ERC20_ABI,
-    //   signer
-    // )
-    // const transaction = await tokenContract.approve(
-    //   NONFUNGIBLE_POSITION_MANAGER,
-    //   1000
-    // )
-    // // console.log(transaction)
-    // const nonfungiblePositionManager = new ethers.Contract(
-    //   NONFUNGIBLE_POSITION_MANAGER,
-    //   artifacts.NonfungiblePositionManager.abi,
-    //   signer
-    // );
-    // console.log(nonfungiblePositionManager)
-    // const createdPool = await nonfungiblePositionManager
-    //   .connect(signer)
-    //   .createAndInitializePoolIfNecessary(
-    //     tokenAs,
-    //     tokenBs,
-    //     100,
-    //     encodePriceSqrt(amountTokenB,amountTokenA),
-    //     { gasLimit: 5000000 }
-    //   );
+    const tokenContract = new ethers.Contract(
+      tokenAs,
+      ERC20_ABI,
+      signer
+    )
+    const tokenContracts = new ethers.Contract(
+      tokenBs,
+      ERC20_ABI,
+      signer
+    )
+    const transaction = await tokenContract.approve(
+      NONFUNGIBLE_POSITION_MANAGER,
+      1000
+    )
+    const transactions = await tokenContracts.approve(
+      NONFUNGIBLE_POSITION_MANAGER,
+      1000
+    )
+    console.log(transaction)
+    const nonfungiblePositionManager = new ethers.Contract(
+      NONFUNGIBLE_POSITION_MANAGER,
+      artifacts.NonfungiblePositionManager.abi,
+      signer
+    );
+    console.log(nonfungiblePositionManager)
+    const createdPool = await nonfungiblePositionManager
+      .connect(signer)
+      .createAndInitializePoolIfNecessary(
+        tokenAs,
+        tokenBs,
+        100,
+        encodePriceSqrt(amountTokenB,amountTokenA),
+      );
   const factory = new ethers.Contract(
       v3Factory,
       artifacts.UniswapV3Factory.abi,
@@ -82,20 +90,20 @@ const Pools = () => {
     )
     console.log(poolAddress)
   
-    // const factory = new ethers.Contract(
-    //   v3Factory,
-    //   artifacts.UniswapV3Factory.abi,
-    //   signer
-    // )
+    const factorys = new ethers.Contract(
+      v3Factory,
+      artifacts.UniswapV3Factory.abi,
+      signer
+    )
 
-    // const poolAddress = await factory.connect(signer).getPool(
-    //   tokenAs,
-    //   tokenBs,
-    //   100
-    // )
-    // console.log(poolAddress)
+    const poolAddresss = await factorys.connect(signer).getPool(
+      tokenAs,
+      tokenBs,
+      100
+    )
+    console.log(poolAddress)
 
-    // console.log(await createdPool.wait());
+    console.log(await createdPool.wait());
     // // Get current user address
   };
 
