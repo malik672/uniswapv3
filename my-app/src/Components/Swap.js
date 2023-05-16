@@ -3,17 +3,14 @@ import swapRouterAbi from "./abi.json";
 import erc20Abi from "./erc20.json";
 import Web3 from "web3";
 import { ethers } from "ethers";
+import {AlphaRouter} from "@uniswap/smart-order-router";
 const UNISWAP = require("@uniswap/sdk");
-const {
-  Token,
-  WETH,
-  Fetcher,
-  Route,
-  Trade,
-  TokenAmount,
-  TradeType,
-  Percent,
-} = require("@uniswap/sdk");
+const artifacts = {
+  NonfungiblePositionManager: require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"),
+  UniswapV3Pool: require("@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json"),
+};
+const { Token } = require("@uniswap/sdk-core");
+const { Pool, Position, nearestUsableTick } = require("@uniswap/v3-sdk");
 
 // Replace CONTRACT_ADDRESS with the actual address of your contract
 const SWAP_ROUTER_CONTRACT_ADDRESS =
@@ -21,34 +18,73 @@ const SWAP_ROUTER_CONTRACT_ADDRESS =
 
 function Swap() {
   // State variables for user input
-  const [inputToken, setInputToken] = useState("");
+  const [tokenAs, setTokenA] = useState("");
+  const [tokenBs, setTokenB] = useState("");
   const [poolAddress, setPoolAddress] = useState("");
-  const [outputToken, setOutputToken] = useState("");
-  const [inputAmount, setInputAmount] = useState(0);
-  const [outputAmount, setOutputAmount] = useState(0);
+  const [amount0Desired, setAmount0Desired] = useState("");
+  const [amount1Desired, setAmount1Desired] = useState("");
+
+  // Connect to provider (e.g. Metamask)
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+  const slippage = 1;
+  // Create signer and contract instances
+  const signer = provider.getSigner();
+
+  const data = async (poolContract) => {
+    const [tickSpacing, fee, liquidity, slot0] = await Promise.all([
+      poolContract.tickSpacing(),
+      poolContract.fee(),
+      poolContract.liquidity(),
+      poolContract.slot0(),
+    ]);
+    return {
+      tickSpacing: tickSpacing,
+      fee: fee,
+      liquidity: liquidity,
+      sqrtPriceX96: slot0[0],
+      tick: slot0[1],
+    };
+  };
 
   // Function to handle token swap
   const handleSwap = async () => {
-    // Connect to provider (e.g. Metamask)
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     await window.ethereum.enable();
-    const slippage = 1;
-    // Create signer and contract instances
-    const signer = provider.getSigner();
+
     const swapRouter = new ethers.Contract(
       SWAP_ROUTER_CONTRACT_ADDRESS,
       swapRouterAbi,
       signer
     );
 
-    // // Calculate amounts
-    const amountsIn = ethers.utils.parseUnits(inputAmount.toString(), 18);
-    const minAmountOut = amountsIn.sub(amountsIn.mul(slippage).div(100));
+    const poolContract = new ethers.Contract(
+      poolAddress,
+      artifacts.UniswapV3Pool.abi,
+      signer
+    );
 
+    const Token_1 = new Token(31337, tokenAs, 18, "redhue", "jue");
+    const Token_2 = new Token(31337, tokenBs, 18, "blue", "ivy");
+
+    // const poolData = await data(poolContract);
+    // console.log(Token_1, Token_2);
+
+    // const pool = new Pool(
+    //   Token_1,
+    //   Token_2,
+    //   poolData.fee,
+    //   poolData.sqrtPriceX96.toString(),
+    //   poolData.liquidity.toString(),
+    //   poolData.tick
+    // );
+
+    // // Calculate amounts
+    const amountsIn = ethers.utils.parseUnits(amount0Desired, 18);
+ 
     // Get current user address
     const userAddress = await signer.getAddress();
 
-    const tokenInContract = new ethers.Contract(inputToken, erc20Abi, signer);
+    const tokenInContract = new ethers.Contract(tokenAs, erc20Abi, signer);
     const allowance = await tokenInContract.allowance(
       userAddress,
       SWAP_ROUTER_CONTRACT_ADDRESS
@@ -60,18 +96,25 @@ function Swap() {
       );
       await approveTx.wait();
     }
+    console.log(swapRouter)
 
-    // Perform swap
-    const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from now
-    const swapTx = await swapRouter.swapExactTokensForTokens(
-      amountsIn,
-      minAmountOut,
-      [inputToken, outputToken],
-      userAddress
-    );
-    await swapTx.wait();
+    const params = {
+      tokenIn: tokenAs,
+      tokenOut: tokenBs,
+      fee:100,
+      recipient:"0xF5b60ae8cd23F82B10E3978F86503389E43dc4af",
+      deadline:Math.floor(Date.now() / 1000) + 60 * 10,
+      amountIn: amount0Desired,
+      amountOutMinimum:0,
+      sqrtPriceLimitX96:0,
 
-    console.log(swapRouter);
+    }
+    
+    const transaction = swapRouter.connect(signer).exactInputSingle(
+      params,
+    )
+    console.log(transaction)
+    
   };
 
   return (
@@ -131,22 +174,10 @@ function Swap() {
         className="w-full border border-gray-400 p-2 rounded-lg"
         onChange={(e) => setTokenB(e.target.value)}
       />
-      <label
-        htmlFor="token2Amount"
-        className="text-gray-700 font-medium mt-4 mb-2 block"
-      >
-        Token 2 Amount:
-      </label>
-      <input
-        type="number"
-        id="token2Amount"
-        className="w-full border border-gray-400 p-2 rounded-lg"
-        onChange={(e) => setAmount1Desired(e.target.value)}
-      />
     </div>
     <button
       className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg"
-      onClick={(e) => main(e)}
+      onClick={(e) => handleSwap(e)}
     >
       Add Liquidity
     </button>
