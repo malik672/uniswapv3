@@ -78,7 +78,7 @@ function Swap() {
     //   poolData.tick
     // );
 
-    // // Calculate amounts
+    // // Calculate amount
     const amountsIn = ethers.utils.parseUnits(amount0Desired, 18);
  
     // Get current user address
