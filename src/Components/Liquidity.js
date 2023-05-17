@@ -102,7 +102,7 @@ const Liquidity = () => {
       amount1Desired: amount1Desired.toString(),
       amount0Min: 0,
       amount1Min: 0,
-      recipient: "0xF5b60ae8cd23F82B10E3978F86503389E43dc4af",
+      recipient: window.ethereum.selectedAddress,
       deadline: Math.floor(Date.now() / 1000) + 60 * 10,
     };
 

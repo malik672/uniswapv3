@@ -102,7 +102,7 @@ function Swap() {
       tokenIn: tokenAs,
       tokenOut: tokenBs,
       fee:100,
-      recipient:"0xF5b60ae8cd23F82B10E3978F86503389E43dc4af",
+      recipient:window.ethereum.selectedAddress,
       deadline:Math.floor(Date.now() / 1000) + 60 * 10,
       amountIn: amount0Desired,
       amountOutMinimum:0,
