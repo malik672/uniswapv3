@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, NavLink, Switch, Route, BrowserRouter as Router } from "react-router-dom";
+import { Link, NavLink, Switch, Route, HashRouter as Router } from "react-router-dom";
 import Pools from "./Pools.js";
 import Swap from "./Swap.js";
 import AddLiquidity from "./Liquidity.js";

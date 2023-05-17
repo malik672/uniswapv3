@@ -9,7 +9,7 @@ import { configureChains, createClient, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter,HashRouter } from "react-router-dom";
 
 const { chains, provider } = configureChains(
   [mainnet, polygon, optimism, arbitrum],
@@ -31,13 +31,13 @@ const wagmiClient = createClient({
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
           <App />
         </RainbowKitProvider>
       </WagmiConfig>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>
 );
 
